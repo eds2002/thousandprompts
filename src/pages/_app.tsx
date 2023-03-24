@@ -1,14 +1,44 @@
 import { type AppType } from "next/app";
+import {
+  ClerkProvider,
+  SignedIn,
+  SignedOut,
+  RedirectToSignIn,
+} from "@clerk/nextjs";
+import { AppProps } from "next/app";
+import { useRouter } from "next/router";
 
 import { api } from "~/utils/api";
 
 import "~/styles/globals.css";
-import { ClerkProvider } from "@clerk/nextjs";
+//  List pages you want to be publicly accessible, or leave empty if
+//  every page requires authentication. Use this naming strategy:
+//   "/"              for pages/index.js
+//   "/foo"           for pages/foo/index.js
+//   "/foo/bar"       for pages/foo/bar.js
+//   "/foo/[...bar]"  for pages/foo/[...bar].js
+const publicPages: Array<string> = ["/"];
 
 const MyApp: AppType = ({ Component, pageProps }) => {
+  // Get the pathname
+  const { pathname } = useRouter();
+
+  // Check if the current route matches a public page
+  const isPublicPage = publicPages.includes(pathname);
   return (
     <ClerkProvider {...pageProps}>
-      <Component {...pageProps} />
+      {isPublicPage ? (
+        <Component {...pageProps} />
+      ) : (
+        <>
+          <SignedIn>
+            <Component {...pageProps} />
+          </SignedIn>
+          <SignedOut>
+            <RedirectToSignIn />
+          </SignedOut>
+        </>
+      )}
     </ClerkProvider>
   );
 };
