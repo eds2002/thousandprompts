@@ -17,7 +17,7 @@ model Post {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt()
   published Boolean @default(false)
-  authorId  Int?
+  authorId  String
 }
 
 // model User {
