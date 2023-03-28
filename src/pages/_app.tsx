@@ -25,8 +25,9 @@ const MyApp: AppType = ({ Component, pageProps }) => {
 
   // Check if the current route matches a public page
   const isPublicPage = publicPages.includes(pathname);
+  const { push } = useRouter();
   return (
-    <ClerkProvider {...pageProps}>
+    <ClerkProvider {...pageProps} navigate={(to) => push(to)}>
       {isPublicPage ? (
         <>
           <Header />

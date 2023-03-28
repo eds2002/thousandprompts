@@ -53,10 +53,10 @@ export default function Header({
                 <Button href="/journal">
                   <Image
                     src={user.profileImageUrl}
-                    width={40}
-                    height={40}
+                    width={100}
+                    height={100}
                     alt={`${user.username ?? "my"}'s profile image`}
-                    className="rounded-full"
+                    className="h-12 w-12 rounded-full"
                   />
                 </Button>
               ) : (

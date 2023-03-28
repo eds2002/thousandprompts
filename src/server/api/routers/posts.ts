@@ -15,6 +15,8 @@ const formatUser = (user: User) => {
     username: user.username,
     profilePic: user.profileImageUrl,
     joinedDate: user.createdAt,
+    bannerImage: user.publicMetadata.bannerURL,
+    bio: user.publicMetadata.bio,
   };
 };
 

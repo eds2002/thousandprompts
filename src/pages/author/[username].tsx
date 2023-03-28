@@ -5,6 +5,11 @@ import { DateTime } from "luxon";
 import { api, type RouterOutputs } from "~/utils/api";
 import { generateSSGHelper } from "~/server/helpers/ssgHelper";
 import Link from "next/link";
+import Image from "next/image";
+import LayoutWidth from "~/components/ui/LayoutWidth";
+import Button from "~/components/ui/Button";
+import { BsArrowUpRight, BsArrowUpRightCircle } from "react-icons/bs";
+import ArticleCard from "~/components/misc/ArticleCard";
 
 type AuthedUserPosts = RouterOutputs["posts"]["getAllByUsername"];
 
@@ -14,6 +19,10 @@ const UserPage: NextPage<{ username: string }> = ({ username }) => {
   });
   const { user } = useUser();
 
+  const findTotalPosts = () => {
+    return data?.userPosts.filter((post) => post.published).length;
+  };
+
   return (
     <>
       <Head>
@@ -22,33 +31,97 @@ const UserPage: NextPage<{ username: string }> = ({ username }) => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main className=" min-h-screen ">
-        <div className="h-[10vh] w-full bg-cyan-200">
-          <div className="mx-auto max-w-7xl px-6">
-            <p>{data?.formatedUser.username}</p>
-            <p>
-              {DateTime.fromMillis(
-                data?.formatedUser.joinedDate as number
-              ).toFormat("DDD")}
-            </p>
+        <div className="relative h-[30vh] w-full bg-neutral-200 lg:h-[35vh]">
+          <Image
+            src={data?.formatedUser.bannerImage ?? "/placeholder.png"}
+            fill
+            alt="Placeholder image, image of journaling"
+            className={`h-full w-full object-cover ${
+              !data?.formatedUser.bannerImage && "opacity-20"
+            }`}
+            priority
+          />
+          <div className="relative mx-auto h-full max-w-7xl px-6">
+            <div className="pointer-events-none absolute -bottom-[80px]  left-4 h-28 w-28 select-none rounded-full border-[3px] border-white bg-neutral-200">
+              <div className="h-full w-full">
+                <Image
+                  src={data?.formatedUser.profilePic}
+                  fill
+                  className="rounded-full  object-cover"
+                  alt={`${data?.formatedUser.username}'s profile picture}`}
+                />
+              </div>
+            </div>
           </div>
         </div>
-        <div className="grid grid-cols-3 gap-6">
-          {data?.userPosts.map((post) => (
-            <div key={post.id} className="w-full bg-neutral-200">
-              {user?.id === post.authorId && !post.published && (
-                <p>This is a draf post, hidden from others but you</p>
-              )}
-              <Link
-                href={`/journal/post/${post.id}`}
-                key={post.id}
-                className="rounded-xl p-4"
-              >
-                <p>{post.title}</p>
-                <p>CREATEDAT</p>
-              </Link>
+        <div className="w-full py-4">
+          <LayoutWidth>
+            <div className="ml-32 flex items-center justify-between">
+              <div>
+                <p className=" text-3xl font-semibold">
+                  {data?.formatedUser.username}
+                </p>
+                <p className="  text-base font-semibold opacity-70">
+                  {data?.formatedUser.bio ?? "Author at blog"}
+                </p>
+              </div>
+              <div className="ml-auto  w-max ">
+                <p className="text-base font-semibold">Total Posts</p>
+                <p className="text-right text-3xl font-bold">
+                  {findTotalPosts()}
+                </p>
+              </div>
             </div>
-          ))}
+          </LayoutWidth>
         </div>
+        <LayoutWidth>
+          <div className="grid gap-6 py-4 sm:grid-cols-2 lg:grid-cols-12 lg:py-16">
+            <div className="sm:col-span-2 lg:col-span-4">
+              <p className="text-3xl font-semibold">All Posts</p>
+              <p className="text-base opacity-70 ">Check out some of my work</p>
+            </div>
+            <div className="grid w-full gap-4  sm:col-span-2 sm:grid-cols-2 lg:col-span-8">
+              {data?.userPosts.map((post) => (
+                <>
+                  {post.published && (
+                    <ArticleCard
+                      createdAt={post.createdAt}
+                      imgUrl={post.imageUrl}
+                      postId={post.id}
+                      title={post.title}
+                    />
+                  )}
+                </>
+              ))}
+            </div>
+          </div>
+          {data?.userPosts.some(
+            (post) => user?.id === post.authorId && !post.published
+          ) && (
+            <div className="grid gap-6 py-4 sm:grid-cols-2 lg:grid-cols-12 lg:py-16">
+              <div className="sm:col-span-2 lg:col-span-4">
+                <p className="text-3xl font-semibold">Drafts</p>
+                <p className="text-base opacity-70 ">
+                  Super secret posts. (Only you can see these)
+                </p>
+              </div>
+              <div className="col-span-2 grid w-full grid-cols-2 gap-4 lg:col-span-8">
+                {data?.userPosts.map((post) => (
+                  <>
+                    {user?.id === post.authorId && !post.published && (
+                      <ArticleCard
+                        createdAt={post.createdAt}
+                        imgUrl={post.imageUrl}
+                        postId={post.id}
+                        title={post.title}
+                      />
+                    )}
+                  </>
+                ))}
+              </div>
+            </div>
+          )}
+        </LayoutWidth>
       </main>
     </>
   );

@@ -3,13 +3,22 @@ import React, { useRef, useState } from "react";
 import { MdRemove, MdUpload } from "react-icons/md";
 import Button from "../ui/Button";
 import Image from "next/image";
+import { twMerge } from "tailwind-merge";
 
 function ImageInput({
   image,
   setImage,
+  hideText = false,
+  headingText,
+  paragraphText,
+  imageClassname,
 }: {
   image: string | Blob | null;
-  setImage: (val: string) => void;
+  setImage: (val: string | Blob | null) => void;
+  hideText?: boolean;
+  headingText?: string;
+  paragraphText?: string;
+  imageClassname?: string;
 }) {
   const [dragActive, setDragActive] = useState(false);
   // handle drag events
@@ -59,16 +68,16 @@ function ImageInput({
         e.dataTransfer.files[0].type === "image/jpeg" ||
         e.dataTransfer.files[0].type === "image/webp"
       ) {
-        // When all is good, display the image back to the user.
+        // When all is good, display the image back to the user.a
         setImage(e.dataTransfer.files[0] as unknown as string);
       }
     }
   };
   return (
     <>
-      <h2 className="mb-2 text-xl font-bold">Hero Image</h2>
+      {!hideText && <h2 className="mb-2 text-xl font-bold">Hero Image</h2>}
       <form
-        className="relative mb-4 overflow-hidden rounded-xl bg-neutral-100 p-4 lg:p-0"
+        className="relative mb-4 h-full overflow-hidden rounded-xl bg-neutral-100 p-4 lg:p-0"
         onDragEnter={(e) => handleDrag(e)}
         onSubmit={(e) => e.preventDefault()}
       >
@@ -82,7 +91,7 @@ function ImageInput({
           required
         />
         <label
-          className="relative flex  h-full items-center justify-center rounded-xl border-2 border-dashed p-4"
+          className="relative flex  h-full items-center justify-center rounded-xl border-2 border-dashed "
           htmlFor="input-file-upload"
         >
           <div className="flex max-w-xs flex-col items-center justify-center">
@@ -100,9 +109,12 @@ function ImageInput({
             >
               <MdUpload className="text-6xl" />
             </motion.div>
-            <p className="text-center font-medium">Drag and drop an image.</p>
+            <p className="text-center font-medium">
+              {headingText ?? "Drag and drop an image."}
+            </p>
             <p className="text-center text-sm opacity-70">
-              Your posts will be private until you upload an image.
+              {paragraphText ??
+                "Your posts will be private until you upload an image."}
             </p>
             <Button
               onClick={onButtonClick}
@@ -128,10 +140,13 @@ function ImageInput({
                 src={image instanceof Blob ? URL.createObjectURL(image) : image}
                 alt="Selected image"
                 fill
-                className="object-contain"
+                className={`${twMerge("object-contain", imageClassname)} `}
               />
               <Button
-                onClick={() => setImage("")}
+                onClick={() => {
+                  inputRef.current.value = "";
+                  setImage(null);
+                }}
                 className="absolute bottom-4 left-4 flex h-8 w-8 items-center justify-center rounded-full bg-white"
               >
                 <MdRemove />
