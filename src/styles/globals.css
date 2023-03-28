@@ -2,25 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
-.ltr {
-  text-align: left;
+.ProseMirror:focus {
+  outline: none;
 }
-
-.rtl {
-  text-align: right;
+.ProseMirror {
+  @apply w-full;
 }
-
-.editor-placeholder {
-  color: #999;
-  overflow: hidden;
-  position: absolute;
-  top: 15px;
-  left: 15px;
-  user-select: none;
-  pointer-events: none;
-}
-
-.editor-paragraph {
-  margin: 0 0 15px 0;
-  position: relative;
+.prose {
+  @apply max-w-full;
 }

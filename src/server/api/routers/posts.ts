@@ -19,6 +19,41 @@ const formatUser = (user: User) => {
 };
 
 export const postsRouter = createTRPCRouter({
+  edit: privateProcedure
+    .input(
+      z.object({
+        postId: z.string(),
+        title: z
+          .string({
+            required_error: "Title is required",
+          })
+          .min(1)
+          .max(64),
+        content: z.string({
+          required_error: "Must write something in order to post.",
+        }),
+        published: z.boolean(),
+        imageUrl: z.string({
+          required_error: "An image is required.",
+        }),
+        redirectToPreview: z.boolean(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const post = await ctx.prisma.post.update({
+        where: {
+          id: input.postId,
+        },
+        data: {
+          title: input.title,
+          content: input.content,
+          published: input.published,
+          imageUrl: input.imageUrl,
+        },
+      });
+
+      return { ...post, redirectToPreview: input.redirectToPreview };
+    }),
   create: privateProcedure
     .input(
       z.object({
@@ -26,12 +61,16 @@ export const postsRouter = createTRPCRouter({
           .string({
             required_error: "Title is required",
           })
-          .min(8)
-          .max(250),
+          .min(1)
+          .max(64),
         content: z.string({
           required_error: "Must write something in order to post.",
         }),
         published: z.boolean(),
+        imageUrl: z.string({
+          required_error: "An image is required.",
+        }),
+        redirectToPreview: z.boolean(),
       })
     )
     .mutation(async ({ ctx, input }) => {
@@ -45,10 +84,11 @@ export const postsRouter = createTRPCRouter({
           content: input.content,
           title: input.title,
           published: true,
+          imageUrl: input.imageUrl,
         },
       });
 
-      return post;
+      return { ...post, redirectToPreview: input.redirectToPreview };
     }),
   getUserPosts: privateProcedure.query(async ({ ctx }) => {
     const allPostsById = await ctx.prisma.post.findMany({
@@ -60,7 +100,7 @@ export const postsRouter = createTRPCRouter({
     return allPostsById;
   }),
   delete: privateProcedure
-    .input(z.object({ postId: z.number() }))
+    .input(z.object({ postId: z.string() }))
     .mutation(async ({ ctx, input }) => {
       const deletePost = await ctx.prisma.post.delete({
         where: {
@@ -90,23 +130,22 @@ export const postsRouter = createTRPCRouter({
       };
     }),
   getById: publicProcedure
-    .input(z.object({ postId: z.number() }))
+    .input(z.object({ postId: z.string() }))
     .query(async ({ ctx, input }) => {
       const userPost = await ctx.prisma.post.findUnique({
         where: {
           id: input.postId,
         },
       });
+
       if (!userPost) throw new TRPCError({ code: "NOT_FOUND" });
 
       const [userData] = await clerkClient.users.getUserList({
         userId: [userPost.authorId],
       });
 
-      if (!userData) throw new TRPCError({ code: "NOT_FOUND" });
-
       return {
-        user: formatUser(userData),
+        user: formatUser(userData!),
         post: userPost,
       };
     }),

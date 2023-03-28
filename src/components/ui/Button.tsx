@@ -1,7 +1,8 @@
 import Link from "next/link";
-import React from "react";
+import React, { ClassAttributes, ComponentClass } from "react";
 import type { ReactNode } from "react";
 import { twMerge } from "tailwind-merge";
+import { VscLoading } from "react-icons/vsc";
 
 type DefaultStyles = "outline" | "primary" | "secondary";
 
@@ -11,29 +12,34 @@ export default function Button({
   children,
   style = "primary",
   onClick,
+  disabled = false,
+  isLoading = false,
 }: {
   href?: string;
   className?: string;
   children: ReactNode;
   style?: DefaultStyles;
   onClick?: () => void;
+  disabled?: boolean;
+  isLoading?: boolean;
 }) {
   let defaultStyle = "";
   switch (style) {
     case "primary": {
-      defaultStyle = "";
+      defaultStyle = "disabled:bg-stone-600 disabled:cursor-default";
       break;
     }
     case "secondary": {
-      defaultStyle = "";
+      defaultStyle = "disabled:bg-stone-600 disabled:cursor-default";
       break;
     }
     case "outline": {
-      defaultStyle = "border rounded-full p-4 border-white";
+      defaultStyle =
+        "border rounded-full p-4 border-white disabled:bg-stone-600 disabled:cursor-default";
       break;
     }
     default: {
-      defaultStyle = "";
+      defaultStyle = "disabled:bg-stone-600 disabled:cursor-default";
       break;
     }
   }
@@ -41,12 +47,16 @@ export default function Button({
   return (
     <>
       {href ? (
-        <Link className={buttonClasses} href={href}>
+        <Link className={"relative block  " + buttonClasses} href={href}>
           {children}
         </Link>
       ) : (
-        <button onClick={onClick} className={buttonClasses}>
-          {children}
+        <button disabled={disabled} onClick={onClick} className={buttonClasses}>
+          {isLoading ? (
+            <VscLoading className="animate-spin" />
+          ) : (
+            <>{children}</>
+          )}
         </button>
       )}
     </>

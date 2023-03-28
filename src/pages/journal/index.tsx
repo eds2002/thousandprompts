@@ -16,10 +16,9 @@ const Post = (props: AuthedUserPosts) => {
       onError: (e) => {
         const errorMessage = e.data?.zodError?.fieldErrors.content;
         if (errorMessage && errorMessage[0]) {
-          alert(errorMessage[0]);
+          throw new Error(errorMessage[0]);
         } else {
-          console.log(errorMessage);
-          alert("Failed to post! Please try again later");
+          throw new Error("Failed to post! Please try again later");
         }
       },
     });

@@ -1,8 +1,8 @@
 import { SignInButton, SignOutButton, useUser } from "@clerk/nextjs";
-import { GetStaticProps, type NextPage } from "next";
+import { type GetStaticProps, type NextPage } from "next";
 import Head from "next/head";
 import { DateTime } from "luxon";
-import { api, RouterOutputs } from "~/utils/api";
+import { api, type RouterOutputs } from "~/utils/api";
 import { generateSSGHelper } from "~/server/helpers/ssgHelper";
 import Link from "next/link";
 
@@ -12,6 +12,7 @@ const UserPage: NextPage<{ username: string }> = ({ username }) => {
   const { data } = api.posts.getAllByUsername.useQuery({
     username,
   });
+  const { user } = useUser();
 
   return (
     <>
@@ -33,14 +34,19 @@ const UserPage: NextPage<{ username: string }> = ({ username }) => {
         </div>
         <div className="grid grid-cols-3 gap-6">
           {data?.userPosts.map((post) => (
-            <Link
-              href={`/journal/post/${post.id}`}
-              key={post.id}
-              className="rounded-xl bg-neutral-200 p-4"
-            >
-              <p>{post.title}</p>
-              <p>CREATEDAT</p>
-            </Link>
+            <div key={post.id} className="w-full bg-neutral-200">
+              {user?.id === post.authorId && !post.published && (
+                <p>This is a draf post, hidden from others but you</p>
+              )}
+              <Link
+                href={`/journal/post/${post.id}`}
+                key={post.id}
+                className="rounded-xl p-4"
+              >
+                <p>{post.title}</p>
+                <p>CREATEDAT</p>
+              </Link>
+            </div>
           ))}
         </div>
       </main>
