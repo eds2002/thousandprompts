@@ -84,10 +84,10 @@ const Home: NextPage = () => {
                 <>
                   {index > 0 && (
                     <ArticleCard
-                      createdAt={data.createdAt}
-                      imgUrl={data?.imageUrl}
-                      postId={data.id}
-                      title={data.title}
+                      createdAt={data!.createdAt}
+                      imgUrl={data!.imageUrl}
+                      postId={data!.id}
+                      title={data!.title}
                       includeAuthorImg={data?.profilePic}
                       containerClassName="md:max-w-[600px] md:min-w-[600px] md:w-screen md:relative md:snap-center md:mx-4"
                     />

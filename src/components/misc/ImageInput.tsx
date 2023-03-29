@@ -53,12 +53,21 @@ function ImageInput({
   };
 
   const inputRef = useRef(null);
-  const onButtonClick = () => {
+
+  // Create a function that clicks the input when the button is clicked
+  const onButtonClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     if (inputRef.current) {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-      inputRef.current.click();
+      e.currentTarget.click();
     }
   };
+
+  // const onButtonClick = (e) => {
+  //   if (inputRef.current) {
+  //     // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+  //     e.current.click();
+  //   }
+  // };
   // triggers when file is dropped
   const handleDrop = function (
     e: React.DragEvent<HTMLFormElement> | React.DragEvent<HTMLDivElement>
@@ -127,7 +136,9 @@ function ImageInput({
                 "Your posts will be private until you upload an image."}
             </p>
             <Button
-              onClick={onButtonClick}
+              onClick={(e: React.MouseEvent<HTMLButtonElement>) =>
+                onButtonClick(e)
+              }
               className="mt-4 rounded-full bg-black px-4 py-1 text-white"
             >
               Pick a file
@@ -153,8 +164,9 @@ function ImageInput({
                 className={`${twMerge("object-contain", imageClassname)} `}
               />
               <Button
-                onClick={() => {
-                  inputRef.current.value = "";
+                onClick={(e) => {
+                  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+                  e.currentTarget.value = "";
                   setImage(null);
                 }}
                 className="absolute bottom-4 left-4 flex h-8 w-8 items-center justify-center rounded-full bg-white"

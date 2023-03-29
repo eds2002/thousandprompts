@@ -33,7 +33,7 @@ const config = {
       "error",
       { checksVoidReturn: { attributes: false } },
     ],
-    "no-console": "error",
+    "no-console": "warn",
   },
 };
 

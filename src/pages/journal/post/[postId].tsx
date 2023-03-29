@@ -78,7 +78,7 @@ const SelectedPost: NextPage<{ postId: string }> = ({ postId }) => {
                   />
                 </div>
                 <Button
-                  href={`/author/${data!.user.username!}`}
+                  href={`/author/${data!.user.username}`}
                   className="font-medium"
                 >
                   {data?.user.username}

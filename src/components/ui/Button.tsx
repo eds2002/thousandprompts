@@ -19,7 +19,7 @@ export default function Button({
   className?: string;
   children: ReactNode;
   style?: DefaultStyles;
-  onClick?: () => void;
+  onClick?: (val?: any) => void;
   disabled?: boolean;
   isLoading?: boolean;
 }) {
