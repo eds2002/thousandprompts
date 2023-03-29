@@ -12,12 +12,25 @@ import { TRPCError } from "@trpc/server";
 const formatUser = (user: User) => {
   return {
     id: user.id,
-    username: user.username,
+    username: user.username ?? "",
     profilePic: user.profileImageUrl,
     joinedDate: user.createdAt,
-    bannerImage: user.publicMetadata.bannerURL,
-    bio: user.publicMetadata.bio,
+    bannerImage: user.publicMetadata.bannerURL as string | null,
+    bio: user.publicMetadata.bio as string | null,
   };
+};
+
+const addUserToPost = (posts: Post[], users: User[]) => {
+  return posts.map((post) => {
+    const user = users.find((user) => user.id === post.authorId);
+    if (user) {
+      return {
+        ...post,
+        username: user.username,
+        profilePic: user.profileImageUrl,
+      };
+    }
+  });
 };
 
 export const postsRouter = createTRPCRouter({
@@ -150,5 +163,19 @@ export const postsRouter = createTRPCRouter({
         user: formatUser(userData!),
         post: userPost,
       };
+    }),
+  getPosts: publicProcedure
+    .input(z.object({ amount: z.number().nullable() }))
+    .query(async ({ ctx, input }) => {
+      const allPosts = await ctx.prisma.post.findMany({
+        where: {
+          published: true,
+        },
+        take: input.amount ?? 50,
+      });
+
+      const users = await clerkClient.users.getUserList();
+
+      return addUserToPost(allPosts, users);
     }),
 });

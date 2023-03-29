@@ -2,14 +2,10 @@ import { SignInButton, SignUpButton, useUser } from "@clerk/nextjs";
 import Button from "../ui/Button";
 import LayoutWidth from "../ui/LayoutWidth";
 import Image from "next/image";
-import { BsArrowLeft, BsCheck } from "react-icons/bs";
+import { BsArrowLeft } from "react-icons/bs";
 import { twMerge } from "tailwind-merge";
-import { AnimatePresence, motion } from "framer-motion";
-import { useRef, useState } from "react";
-import Input from "../ui/Input";
-import { useClickOutside } from "~/hooks/useClickOutside";
-import { DateTime } from "luxon";
 import { useRouter } from "next/router";
+import Link from "next/link";
 
 type HeaderStyles = "create" | "default" | "post-preview";
 
@@ -35,9 +31,11 @@ export default function Header({
   return (
     <>
       {forPage === "default" && (
-        <header className={`${twMerge("w-full py-4", headerStyle)}`}>
+        <header className={`${twMerge("w-full py-2.5", headerStyle)}`}>
           <LayoutWidth className="flex items-center justify-between">
-            <p className="flex-1 text-xl font-semibold">Logo</p>
+            <Link href="/" className="flex-1 text-xl font-semibold">
+              Logo
+            </Link>
             <nav className="hidden flex-1 items-center justify-center md:flex">
               {links.map((link) => (
                 <li
@@ -50,7 +48,7 @@ export default function Header({
             </nav>
             <div className="flex flex-1 items-center justify-end gap-x-3">
               {isSignedIn ? (
-                <Button href="/journal">
+                <Button href={`/author/${user?.username ?? ""}`}>
                   <Image
                     src={user.profileImageUrl}
                     width={100}
@@ -107,7 +105,9 @@ const CreatorHeading = ({
           <Button className="flex items-center justify-center p-1">
             <BsArrowLeft className="text-2xl" />
           </Button>
-          <p className="flex-1 text-xl font-semibold">Logo</p>
+          <Link href="/" className="flex-1 text-xl font-semibold">
+            Logo
+          </Link>
         </div>
         <div className="relative flex items-center justify-center gap-x-3">
           <Button

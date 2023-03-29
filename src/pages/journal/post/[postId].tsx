@@ -1,4 +1,4 @@
-import { GetServerSideProps, type GetStaticProps, type NextPage } from "next";
+import { type GetServerSideProps, type NextPage } from "next";
 import Head from "next/head";
 import { api } from "~/utils/api";
 import { generateSSGHelper } from "~/server/helpers/ssgHelper";
@@ -20,7 +20,9 @@ const SelectedPost: NextPage<{ postId: string }> = ({ postId }) => {
   });
 
   const editor = useEditor({
-    content: JSON.parse(data?.post.content),
+    content: data?.post.content
+      ? (JSON.parse(data.post.content) as string)
+      : "",
     extensions: [StarterKit],
     editable: false,
     editorProps: {
@@ -48,67 +50,75 @@ const SelectedPost: NextPage<{ postId: string }> = ({ postId }) => {
           <div className="h-full pb-24 lg:col-span-8">
             <div className="relative aspect-video rounded-xl bg-neutral-100">
               <Image
-                src={data.post.imageUrl}
+                src={(data?.post.imageUrl as string) ?? ""}
                 alt="Blog image"
                 fill
                 quality={100}
                 priority
+                placeholder="blur"
+                blurDataURL="/placeholder.png"
                 className="pointer-events-none h-full w-full select-none rounded-xl object-cover"
               />
               <div className="absolute -bottom-10 left-0 max-w-md rounded-xl  bg-white p-4 shadow-lg">
-                <h1 className="text-4xl font-bold">{data.post.title}</h1>
+                <h1 className="text-4xl font-bold">{data?.post.title}</h1>
               </div>
             </div>
             <EditorContent editor={editor} className="mt-16" />
             <Comments postId={postId} />
           </div>
-          <aside className="sticky top-0 h-full rounded-xl  bg-neutral-100 p-4 lg:col-span-4">
-            <div className="w-full">
-              <div className="relative h-24 w-24 rounded-full bg-neutral-400">
-                <Image
-                  src={data.user.profilePic}
-                  alt={`${data.user.username}'s profile picture`}
-                  fill
-                  className="rounded-full object-cover"
-                />
-              </div>
-              <Button
-                href={`/author/${data.user.username}`}
-                className="font-medium"
-              >
-                {data.user.username}
-              </Button>
-              <p className="mt-2">A short bio of the user.</p>
-              <Button
-                href={`/author/${data.user.username}`}
-                className="mt-4 rounded-full bg-black px-4 py-2 text-center text-white"
-              >
-                Visit profile
-              </Button>
-              {user?.id === data.user.id && (
-                <Button
-                  href={`/journal/create?p=${data?.post.id}`}
-                  className="mt-2 rounded-full bg-black px-4 py-2 text-center text-white"
-                >
-                  Edit Post
-                </Button>
-              )}
-            </div>
-            <p className="mb-2 mt-6 font-semibold lg:text-lg">
-              More you might love
-            </p>
-            <div className="space-y-3">
-              {[0, 1, 2].map((val) => (
-                <div
-                  key={val}
-                  className="flex items-center justify-between rounded-xl bg-neutral-200 p-4"
-                >
-                  <p className="max-w-[175px] text-base font-semibold lg:text-lg">
-                    A title of the users post.
-                  </p>
-                  <div className="aspect-video h-full max-h-[115px] max-w-[300px] flex-1 rounded-xl bg-red-500 p-4"></div>
+          <aside className="sticky top-0 max-h-screen rounded-xl  bg-neutral-100 p-4 lg:col-span-4">
+            <div className="">
+              <div className="w-full">
+                <div className="relative h-24 w-24 rounded-full bg-neutral-400">
+                  <Image
+                    src={data!.user.profilePic}
+                    alt={`${data!.user.username}'s profile picture`}
+                    fill
+                    className="rounded-full object-cover"
+                  />
                 </div>
-              ))}
+                <Button
+                  href={`/author/${data!.user.username!}`}
+                  className="font-medium"
+                >
+                  {data?.user.username}
+                </Button>
+                <p className="mt-2">
+                  {!!data?.user.bio || data?.user.bio !== ""
+                    ? `"${data!.user.bio!}"`
+                    : "Author at blog"}
+                </p>
+                <Button
+                  href={`/author/${data!.user?.username}`}
+                  className="mt-4 rounded-full bg-black px-4 py-2 text-center text-white"
+                >
+                  Visit profile
+                </Button>
+                {user?.id === data!.user.id && (
+                  <Button
+                    href={`/journal/create?p=${data!.post.id}`}
+                    className="mt-2 rounded-full bg-black px-4 py-2 text-center text-white"
+                  >
+                    Edit Post
+                  </Button>
+                )}
+              </div>
+              <p className="mb-2 mt-6 font-semibold lg:text-lg">
+                More you might love
+              </p>
+              <div className="space-y-3">
+                {[0, 1, 2].map((val) => (
+                  <div
+                    key={val}
+                    className="flex items-center justify-between rounded-xl bg-neutral-200 p-4"
+                  >
+                    <p className="max-w-[175px] text-base font-semibold lg:text-lg">
+                      A title of the users post.
+                    </p>
+                    <div className="aspect-video h-full max-h-[115px] max-w-[300px] flex-1 rounded-xl bg-red-500 p-4"></div>
+                  </div>
+                ))}
+              </div>
             </div>
           </aside>
         </LayoutWidth>

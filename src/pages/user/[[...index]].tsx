@@ -1,6 +1,5 @@
-import { useClerk, UserProfile, useUser } from "@clerk/nextjs";
-import { users } from "@clerk/nextjs/dist/api";
-import React, { useRef, useState } from "react";
+import { UserProfile, useUser } from "@clerk/nextjs";
+import { useRef, useState } from "react";
 import ImageInput from "~/components/misc/ImageInput";
 import { api } from "~/utils/api";
 import Image from "next/image";
@@ -32,22 +31,24 @@ export default function UserProfilePage() {
   // create an async function
   const { user } = useUser();
 
-  const { mutate: updateBio } = api.user.updateBio.useMutation({
-    onSuccess() {
-      setModal({ isSuccess: true, open: true });
-    },
-    onError() {
-      setModal({ isSuccess: false, open: true });
-    },
-  });
-  const { mutate: updateBanner } = api.user.updateBanner.useMutation({
-    onSuccess() {
-      setModal({ isSuccess: true, open: true });
-    },
-    onError() {
-      setModal({ isSuccess: false, open: true });
-    },
-  });
+  const { mutate: updateBio, isLoading: isUpdatingBio } =
+    api.user.updateBio.useMutation({
+      onSuccess() {
+        setModal({ isSuccess: true, open: true });
+      },
+      onError() {
+        setModal({ isSuccess: false, open: true });
+      },
+    });
+  const { mutate: updateBanner, isLoading: isUpatingBanner } =
+    api.user.updateBanner.useMutation({
+      onSuccess() {
+        setModal({ isSuccess: true, open: true });
+      },
+      onError() {
+        setModal({ isSuccess: false, open: true });
+      },
+    });
 
   const [image, setImage] = useState<string | Blob | null>(
     (user?.publicMetadata?.bannerURL as string) ?? null
@@ -57,31 +58,35 @@ export default function UserProfilePage() {
   );
 
   const handlePost = async () => {
-    if (user?.publicMetadata.bannerImage !== image || image !== null) {
-      const { data, error } = await uploadImageToBucket({
-        image: image as unknown as string,
-        userId: user?.id as string,
-      });
-      if (error) throw new Error(error.message);
-      const { data: imageData } = getImagePublicURL({
-        imagePath: data.path,
-      });
+    if (user?.publicMetadata.bannerImage !== image) {
+      let bannerURL = "";
+      if (!!image) {
+        const { data, error } = await uploadImageToBucket({
+          image: image as unknown as string,
+          userId: user?.id as string,
+        });
+        if (error) throw new Error(error.message);
+        const { data: imageData } = getImagePublicURL({
+          imagePath: data.path,
+        });
+        bannerURL = imageData.publicUrl;
+      }
       // User id cannot be null since we are in the settings page
       updateBanner({
         publicMetaData: {
           bio: (user?.publicMetadata?.bio as string) ?? "",
-          bannerURL: imageData.publicUrl,
+          bannerURL,
         },
         userId: user?.id as string,
       });
     }
 
-    if (bio !== user?.publicMetadata.bio && bio !== "") {
+    if (bio !== user?.publicMetadata.bio) {
       // User id cannot be null since we are in the settings page
       updateBio({
         userId: user?.id as string,
         publicMetaData: {
-          bio,
+          bio: bio,
           bannerURL: (user?.publicMetadata?.bannerURL as string) ?? "",
         },
       });
@@ -165,9 +170,10 @@ export default function UserProfilePage() {
         <div className="mx-auto w-full max-w-7xl px-4 ">
           <Button
             onClick={handlePost}
+            isLoading={isUpatingBanner || isUpdatingBio}
             disabled={
-              (user?.publicMetadata.bannerImage === image || image === null) &&
-              (bio === user?.publicMetadata.bio || bio === "")
+              user?.publicMetadata.bannerURL === image &&
+              bio === user?.publicMetadata.bio
             }
             className="w-full rounded-xl bg-black py-4 px-24 text-white sm:float-right sm:w-auto"
           >
@@ -224,7 +230,7 @@ function SuccessModal({
           onClick={() => closeFn()}
           className="mt-6 w-full rounded-xl bg-black p-4 text-white"
         >
-          Great, thanks
+          {isSuccess ? "Great, thanks" : "Okay, got it"}
         </Button>
       </motion.div>
     </motion.div>

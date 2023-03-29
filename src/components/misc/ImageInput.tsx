@@ -12,6 +12,8 @@ function ImageInput({
   headingText,
   paragraphText,
   imageClassname,
+  formClassname,
+  labelClassname,
 }: {
   image: string | Blob | null;
   setImage: (val: string | Blob | null) => void;
@@ -19,6 +21,8 @@ function ImageInput({
   headingText?: string;
   paragraphText?: string;
   imageClassname?: string;
+  formClassname?: string;
+  labelClassname?: string;
 }) {
   const [dragActive, setDragActive] = useState(false);
   // handle drag events
@@ -77,7 +81,10 @@ function ImageInput({
     <>
       {!hideText && <h2 className="mb-2 text-xl font-bold">Hero Image</h2>}
       <form
-        className="relative mb-4 h-full overflow-hidden rounded-xl bg-neutral-100 p-4 lg:p-0"
+        className={`${twMerge(
+          "relative mb-4 h-full overflow-hidden rounded-xl bg-neutral-100 p-4 lg:p-0",
+          formClassname
+        )}`}
         onDragEnter={(e) => handleDrag(e)}
         onSubmit={(e) => e.preventDefault()}
       >
@@ -91,7 +98,10 @@ function ImageInput({
           required
         />
         <label
-          className="relative flex  h-full items-center justify-center rounded-xl border-2 border-dashed "
+          className={`${twMerge(
+            "relative flex  h-full items-center justify-center rounded-xl border-2 border-dashed",
+            labelClassname
+          )}  `}
           htmlFor="input-file-upload"
         >
           <div className="flex max-w-xs flex-col items-center justify-center">

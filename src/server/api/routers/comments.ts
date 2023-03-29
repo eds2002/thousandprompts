@@ -6,10 +6,10 @@ import {
   publicProcedure,
 } from "~/server/api/trpc";
 import type { User } from "@clerk/nextjs/dist/api";
-import { TRPCError } from "@trpc/server";
 
 const formatUser = (user: User) => {
   return {
+    id: user.id,
     username: user.username,
     profilePic: user.profileImageUrl,
   };
@@ -30,6 +30,7 @@ export const commentsRouter = createTRPCRouter({
           required_error: "Must write something in order to post.",
         }),
         replyId: z.string().nullable(),
+        userId: z.string(),
       })
     )
     .mutation(async ({ ctx, input }) => {
@@ -37,6 +38,7 @@ export const commentsRouter = createTRPCRouter({
         data: {
           content: input.content,
           username: input.username,
+          userId: input.userId,
           postId: input.postId,
           replyId: input.replyId,
         },
@@ -58,7 +60,7 @@ export const commentsRouter = createTRPCRouter({
       const users = await clerkClient.users.getUserList();
 
       const commentsWithUsers = comments.map((comment) => {
-        const user = users.find((user) => user.username === comment.username);
+        const user = users.find((user) => user.id === comment.userId);
         return {
           ...comment,
           user: user ? formatUser(user) : null,

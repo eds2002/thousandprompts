@@ -269,7 +269,12 @@ const PostDetails = ({
         setIsPublished={setIsPublished}
       />
       <TitleInput title={title} setTitle={setTitle} />
-      <ImageInput image={image} setImage={setImage} />
+      <ImageInput
+        image={image}
+        setImage={setImage}
+        formClassname="h-auto"
+        labelClassname="p-4"
+      />
     </aside>
   );
 };

@@ -17,7 +17,12 @@ import Header from "~/components/global/Header";
 //   "/foo"           for pages/foo/index.js
 //   "/foo/bar"       for pages/foo/bar.js
 //   "/foo/[...bar]"  for pages/foo/[...bar].js
-const publicPages: Array<string> = ["/"];
+const publicPages: Array<string> = [
+  "/",
+  "/author/[...username]",
+  "/journal/post/[postId]",
+  "/author/[username]",
+];
 
 const MyApp: AppType = ({ Component, pageProps }) => {
   // Get the pathname
@@ -30,7 +35,6 @@ const MyApp: AppType = ({ Component, pageProps }) => {
     <ClerkProvider {...pageProps} navigate={(to) => push(to)}>
       {isPublicPage ? (
         <>
-          <Header />
           <Component {...pageProps} />
         </>
       ) : (

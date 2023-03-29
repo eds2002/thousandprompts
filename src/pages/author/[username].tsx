@@ -1,27 +1,27 @@
-import { SignInButton, SignOutButton, useUser } from "@clerk/nextjs";
+import { useUser } from "@clerk/nextjs";
 import { type GetStaticProps, type NextPage } from "next";
 import Head from "next/head";
-import { DateTime } from "luxon";
 import { api, type RouterOutputs } from "~/utils/api";
 import { generateSSGHelper } from "~/server/helpers/ssgHelper";
-import Link from "next/link";
 import Image from "next/image";
 import LayoutWidth from "~/components/ui/LayoutWidth";
 import Button from "~/components/ui/Button";
-import { BsArrowUpRight, BsArrowUpRightCircle } from "react-icons/bs";
+import { BsPencil, BsPlus } from "react-icons/bs";
 import ArticleCard from "~/components/misc/ArticleCard";
+import Header from "~/components/global/Header";
 
-type AuthedUserPosts = RouterOutputs["posts"]["getAllByUsername"];
+type iUserPosts = RouterOutputs["posts"]["getAllByUsername"];
 
 const UserPage: NextPage<{ username: string }> = ({ username }) => {
   const { data } = api.posts.getAllByUsername.useQuery({
     username,
   });
-  const { user } = useUser();
 
   const findTotalPosts = () => {
     return data?.userPosts.filter((post) => post.published).length;
   };
+
+  const { user } = useUser();
 
   return (
     <>
@@ -31,29 +31,12 @@ const UserPage: NextPage<{ username: string }> = ({ username }) => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main className=" min-h-screen ">
-        <div className="relative h-[30vh] w-full bg-neutral-200 lg:h-[35vh]">
-          <Image
-            src={data?.formatedUser.bannerImage ?? "/placeholder.png"}
-            fill
-            alt="Placeholder image, image of journaling"
-            className={`h-full w-full object-cover ${
-              !data?.formatedUser.bannerImage && "opacity-20"
-            }`}
-            priority
-          />
-          <div className="relative mx-auto h-full max-w-7xl px-6">
-            <div className="pointer-events-none absolute -bottom-[80px]  left-4 h-28 w-28 select-none rounded-full border-[3px] border-white bg-neutral-200">
-              <div className="h-full w-full">
-                <Image
-                  src={data?.formatedUser.profilePic}
-                  fill
-                  className="rounded-full  object-cover"
-                  alt={`${data?.formatedUser.username}'s profile picture}`}
-                />
-              </div>
-            </div>
-          </div>
-        </div>
+        <Header />
+        <BannerAndProf
+          bannerImg={data?.formatedUser.bannerImage}
+          profilePic={data?.formatedUser.profilePic ?? ""}
+          username={data?.formatedUser.username ?? ""}
+        />
         <div className="w-full py-4">
           <LayoutWidth>
             <div className="ml-32 flex items-center justify-between">
@@ -62,11 +45,31 @@ const UserPage: NextPage<{ username: string }> = ({ username }) => {
                   {data?.formatedUser.username}
                 </p>
                 <p className="  text-base font-semibold opacity-70">
-                  {data?.formatedUser.bio ?? "Author at blog"}
+                  {!!data?.formatedUser.bio || data?.formatedUser.bio !== ""
+                    ? (data?.formatedUser.bio as string)
+                    : "Author at blog"}
                 </p>
               </div>
-              <div className="ml-auto  w-max ">
-                <p className="text-base font-semibold">Total Posts</p>
+              <div className="ml-auto   ">
+                {data?.formatedUser.id === user?.id && (
+                  <div className="flex items-center justify-end gap-x-3">
+                    <Button
+                      href="/user"
+                      className=" flex h-7  w-7 items-center   justify-center gap-x-3 rounded-full bg-black  text-white"
+                    >
+                      <BsPencil />
+                    </Button>
+                    <Button
+                      href="/journal/create"
+                      className=" flex  h-7  w-7 items-center   justify-center gap-x-3 rounded-full  bg-black  text-white"
+                    >
+                      <BsPlus className="text-2xl " />
+                    </Button>
+                  </div>
+                )}
+                <p className="text-right text-base font-semibold">
+                  Total Posts
+                </p>
                 <p className="text-right text-3xl font-bold">
                   {findTotalPosts()}
                 </p>
@@ -75,49 +78,23 @@ const UserPage: NextPage<{ username: string }> = ({ username }) => {
           </LayoutWidth>
         </div>
         <LayoutWidth>
-          <div className="grid gap-6 py-4 sm:grid-cols-2 lg:grid-cols-12 lg:py-16">
-            <div className="sm:col-span-2 lg:col-span-4">
-              <p className="text-3xl font-semibold">All Posts</p>
-              <p className="text-base opacity-70 ">Check out some of my work</p>
-            </div>
-            <div className="grid w-full gap-4  sm:col-span-2 sm:grid-cols-2 lg:col-span-8">
-              {data?.userPosts.map((post) => (
-                <>
-                  {post.published && (
-                    <ArticleCard
-                      createdAt={post.createdAt}
-                      imgUrl={post.imageUrl}
-                      postId={post.id}
-                      title={post.title}
-                    />
-                  )}
-                </>
-              ))}
-            </div>
-          </div>
-          {data?.userPosts.some(
-            (post) => user?.id === post.authorId && !post.published
-          ) && (
+          {data!.userPosts?.length > 0 ? (
+            <>
+              <PublicPosts data={data!} />
+              <UserDrafts data={data!} />
+            </>
+          ) : (
             <div className="grid gap-6 py-4 sm:grid-cols-2 lg:grid-cols-12 lg:py-16">
               <div className="sm:col-span-2 lg:col-span-4">
-                <p className="text-3xl font-semibold">Drafts</p>
+                <p className="text-3xl font-semibold">All Posts</p>
                 <p className="text-base opacity-70 ">
-                  Super secret posts. (Only you can see these)
+                  Check out some of my work
                 </p>
               </div>
-              <div className="col-span-2 grid w-full grid-cols-2 gap-4 lg:col-span-8">
-                {data?.userPosts.map((post) => (
-                  <>
-                    {user?.id === post.authorId && !post.published && (
-                      <ArticleCard
-                        createdAt={post.createdAt}
-                        imgUrl={post.imageUrl}
-                        postId={post.id}
-                        title={post.title}
-                      />
-                    )}
-                  </>
-                ))}
+              <div className="grid w-full gap-4  sm:col-span-2 sm:grid-cols-2 lg:col-span-8">
+                <div className="flex min-h-[50vh] items-center justify-center">
+                  <p>This user has not posted.</p>
+                </div>
               </div>
             </div>
           )}
@@ -126,6 +103,103 @@ const UserPage: NextPage<{ username: string }> = ({ username }) => {
     </>
   );
 };
+
+const PublicPosts = ({ data }: { data: iUserPosts }) => {
+  return (
+    <div className="grid gap-6 py-4 sm:grid-cols-2 lg:grid-cols-12 lg:py-16">
+      <div className="sm:col-span-2 lg:col-span-4">
+        <p className="text-3xl font-semibold">All Posts</p>
+        <p className="text-base opacity-70 ">Check out some of my work</p>
+      </div>
+      <div className="grid w-full gap-4  sm:col-span-2 sm:grid-cols-2 lg:col-span-8">
+        {data?.userPosts.map((post) => (
+          <>
+            {post.published && (
+              <ArticleCard
+                createdAt={post.createdAt}
+                imgUrl={post.imageUrl}
+                postId={post.id}
+                title={post.title}
+              />
+            )}
+          </>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+const UserDrafts = ({ data }: { data: iUserPosts }) => {
+  const { user } = useUser();
+  return (
+    <>
+      {data?.userPosts.some(
+        (post) => user?.id === post.authorId && !post.published
+      ) && (
+        <div className="grid gap-6 py-4 sm:grid-cols-2 lg:grid-cols-12 lg:py-16">
+          <div className="sm:col-span-2 lg:col-span-4">
+            <p className="text-3xl font-semibold">Drafts</p>
+            <p className="text-base opacity-70 ">
+              Super secret posts. (Only you can see these)
+            </p>
+          </div>
+          <div className="col-span-2 grid w-full grid-cols-2 gap-4 lg:col-span-8">
+            {data?.userPosts.map((post) => (
+              <>
+                {user?.id === post.authorId && !post.published && (
+                  <ArticleCard
+                    createdAt={post.createdAt}
+                    imgUrl={post.imageUrl}
+                    postId={post.id}
+                    title={post.title}
+                  />
+                )}
+              </>
+            ))}
+          </div>
+        </div>
+      )}
+    </>
+  );
+};
+
+const BannerAndProf = ({
+  bannerImg,
+  profilePic,
+  username,
+}: {
+  bannerImg: string | null | undefined;
+  profilePic: string;
+  username: string;
+}) => (
+  <div className="relative h-[30vh] w-full bg-neutral-200 lg:h-[35vh]">
+    <Image
+      src={
+        bannerImg !== "" || !!bannerImg
+          ? (bannerImg as string)
+          : "/placeholder.png"
+      }
+      fill
+      alt="Placeholder image, image of journaling"
+      className={`h-full w-full object-cover ${
+        !bannerImg || bannerImg === "" ? "opacity-20" : ""
+      }`}
+      priority
+    />
+    <div className="relative mx-auto h-full max-w-7xl px-6">
+      <div className="pointer-events-none absolute -bottom-[90px]  left-4 h-28 w-28 select-none rounded-full border-[3px] border-white bg-neutral-200">
+        <div className="h-full w-full">
+          <Image
+            src={profilePic}
+            fill
+            className="rounded-full  object-cover"
+            alt={`${username}'s profile picture}`}
+          />
+        </div>
+      </div>
+    </div>
+  </div>
+);
 
 export const getStaticProps: GetStaticProps = async (context) => {
   const ssg = generateSSGHelper();

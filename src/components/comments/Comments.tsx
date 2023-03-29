@@ -7,7 +7,7 @@ import type { User } from "@clerk/nextjs/dist/api";
 import type { RouterOutputs } from "~/utils/api";
 import { api } from "~/utils/api";
 import { DateTime } from "luxon";
-import { FaEllipsisH } from "react-icons/fa";
+import { FaEllipsisH, FaUser } from "react-icons/fa";
 import { BsBackspace, BsChevronDown, BsPencil } from "react-icons/bs";
 import { useClickOutside } from "~/hooks/useClickOutside";
 import { useRouter } from "next/router";
@@ -157,7 +157,7 @@ const CreateComment = ({
                   src={user.profileImageUrl}
                   alt="My profile image"
                   fill
-                  className="rounded-full"
+                  className="rounded-full object-cover"
                 />
               </div>
               <div className="w-full flex-1">
@@ -166,6 +166,14 @@ const CreateComment = ({
                   className="w-full rounded-none border-b border-black border-black/25 bg-transparent p-0 text-sm transition focus:border-black"
                   onFocus={() => setIsFocused(true)}
                   value={comment}
+                  onKeyUp={(e) => {
+                    if (e.key === "Enter") {
+                      editComment({
+                        id: edit.id,
+                        content: comment,
+                      });
+                    }
+                  }}
                   onChange={(e) => setComment(e.target.value)}
                 />
                 <div className="mt-1 flex items-center justify-end gap-x-3">
@@ -215,6 +223,7 @@ const CreateComment = ({
                         postId: postId,
                         username: user.username!,
                         replyId: isReply ?? null,
+                        userId: user.id,
                       });
                     }
                   }}
@@ -241,6 +250,7 @@ const CreateComment = ({
                           postId: postId,
                           username: user.username!,
                           replyId: isReply ?? null,
+                          userId: user.id,
                         })
                       }
                       isLoading={isPosting}
@@ -334,12 +344,12 @@ const CommentDisplay = ({
             <div className="">
               <div className="flex gap-x-2">
                 <UserProfileImage
-                  username={userDisplay.username}
+                  username={userDisplay.user?.username as string}
                   profileLink={userDisplay.user?.profilePic as string}
                 />
                 <div className="w-full flex-1">
                   <UsernameAndSettingsDisplay
-                    username={userDisplay.username}
+                    username={userDisplay.user?.username as string}
                     createdAt={userDisplay.createdAt}
                     editedAt={userDisplay.updatedAt}
                     setOpenSettings={setOpenSettings}
@@ -504,12 +514,16 @@ const UserProfileImage = ({
   profileLink: string;
   username: string;
 }) => (
-  <div className="relative h-10 w-10 rounded-full bg-neutral-200">
-    <Image
-      src={profileLink}
-      fill
-      className="relative rounded-full object-contain"
-      alt={`${username}'s profile image`}
-    />
+  <div className="relative flex h-10 w-10 items-center justify-center rounded-full bg-neutral-200">
+    {profileLink ? (
+      <Image
+        src={profileLink}
+        fill
+        className="relative rounded-full object-cover"
+        alt={`${username}'s profile image`}
+      />
+    ) : (
+      <FaUser />
+    )}
   </div>
 );
