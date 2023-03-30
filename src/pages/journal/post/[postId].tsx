@@ -146,10 +146,10 @@ const MorePosts = ({ morePosts }: { morePosts: UserPost | undefined }) => {
       {randomPosts().map((morePosts) => (
         <ArticleCard
           containerClassName="max-h-[200px] h-screen"
-          createdAt={morePosts?.createdAt}
-          imgUrl={morePosts?.imageUrl}
-          postId={morePosts?.id}
-          title={morePosts?.title}
+          createdAt={morePosts!.createdAt}
+          imgUrl={morePosts!.imageUrl}
+          postId={morePosts!.id}
+          title={morePosts!.title}
           key={morePosts?.id}
         />
       ))}

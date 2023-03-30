@@ -31,13 +31,13 @@ type Props =
       includeAuthorImg?: never;
       containerClassName?: string;
     })
-  | ({ loading: false } & {
+  | ({ loading?: false } & {
       postId: string;
       imgUrl: string;
       title: string;
       createdAt: Date;
-      includeAuthorImg: string;
-      containerClassName: string;
+      includeAuthorImg?: string;
+      containerClassName?: string;
     });
 
 export default function ArticleCard({
