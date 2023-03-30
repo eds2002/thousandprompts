@@ -11,6 +11,7 @@ import { api } from "~/utils/api";
 
 import "~/styles/globals.css";
 import Header from "~/components/global/Header";
+import Footer from "~/components/global/Footer";
 //  List pages you want to be publicly accessible, or leave empty if
 //  every page requires authentication. Use this naming strategy:
 //   "/"              for pages/index.js
@@ -47,6 +48,7 @@ const MyApp: AppType = ({ Component, pageProps }) => {
           </SignedOut>
         </>
       )}
+      <Footer />
     </ClerkProvider>
   );
 };
