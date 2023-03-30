@@ -98,6 +98,7 @@ const Home: NextPage = () => {
                           title={data!.title}
                           includeAuthorImg={data!.profilePic}
                           containerClassName="md:max-w-[300px] md:min-w-[300px] md:w-screen md:relative md:snap-center md:mx-4"
+                          loading={false}
                         />
                       )}
                     </>

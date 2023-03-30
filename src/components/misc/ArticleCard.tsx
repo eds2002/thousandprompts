@@ -8,34 +8,51 @@ import Button from "../ui/Button";
 import { BsArrowUpRight } from "react-icons/bs";
 import { twMerge } from "tailwind-merge";
 
-type Props<T extends boolean> = T extends true
-  ? {
-      loading?: boolean;
-      containerClassName: string;
-    }
-  : {
+// type Props<T extends boolean> = T extends true
+//   ? {
+//       loading?: boolean;
+//       containerClassName: string;
+//     }
+//   : {
+//       postId: string;
+//       imgUrl: string;
+//       title: string;
+//       createdAt: Date;
+//       includeAuthorImg: string;
+//       containerClassName: string;
+//     };
+
+type Props =
+  | ({ loading: true } & {
+      postId?: never;
+      imgUrl?: never;
+      title?: never;
+      createdAt?: never;
+      includeAuthorImg?: never;
+      containerClassName?: string;
+    })
+  | ({ loading: false } & {
       postId: string;
       imgUrl: string;
       title: string;
       createdAt: Date;
       includeAuthorImg: string;
       containerClassName: string;
-    };
+    });
 
-export default function ArticleCard<T extends boolean>({
+export default function ArticleCard({
+  loading,
   postId,
   imgUrl,
   title,
   createdAt,
   includeAuthorImg,
   containerClassName,
-  loading,
-}: Props<T> & {
-  loading?: T;
-}) {
+}: Props) {
   function handleClick() {
     window.location = `/journal/post/${postId}` as unknown as Location;
   }
+
   return (
     <>
       {!loading ? (
